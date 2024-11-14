@@ -1,6 +1,9 @@
+import UserManagement from "@/components/user-management";
 
 export default function Home() {
   return (
-    <div></div>
+    <div>
+      <UserManagement/>
+    </div>
   );
 }
