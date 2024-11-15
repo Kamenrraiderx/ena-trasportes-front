@@ -14,22 +14,36 @@ type User = {
     Name: string
     Phone: string
     sendDate: string
-    sendMessage: boolean
+    activeSend: boolean
 }
 
 const API_URL = 'http://localhost:4000/v1' // Replace with your actual API URL
 
 export default function UserManagement() {
+    const hoy = new Date();
+
+    // Obtener las partes de la fecha
+    const anio = hoy.getFullYear();
+    const mes = String(hoy.getMonth() + 1).padStart(2, '0'); // El mes empieza desde 0, por eso sumamos 1
+    const dia = String(hoy.getDate()).padStart(2, '0');
+    const horas = String(hoy.getHours()).padStart(2, '0');
+    const minutos = String(hoy.getMinutes()).padStart(2, '0');
+
+    // Formatear la fecha en el formato deseado
+    const fechaFormateada = `${anio}-${mes}-${dia}T${horas}:${minutos}`;
+
+
     const [users, setUsers] = useState<User[]>([])
-    const [globalDate, setGlobalDate] = useState<string>('')
+    const [globalDate, setGlobalDate] = useState<string>(fechaFormateada)
     const [searchTerm, setSearchTerm] = useState<string>('')
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
     const [isAddingUser, setIsAddingUser] = useState<boolean>(false)
-    const [newUser, setNewUser] = useState<Omit<User, 'id'>>({
+    const [newUser, setNewUser] = useState<User>({
+        id: '',
         Name: '',
         Phone: '',
         sendDate: '',
-        sendMessage: false
+        activeSend: false
     })
 
     useEffect(() => {
@@ -43,6 +57,7 @@ export default function UserManagement() {
             if (!response.ok) throw new Error('Failed to fetch users')
             const data = await response.json()
             setUsers(data.users)
+            console.log("Mis usuarios ",data.users)
         } catch (error) {
             toast({
                 title: "Error",
@@ -86,8 +101,8 @@ export default function UserManagement() {
 
     const handleToggleActiveSend = async (userId: string, newValue: boolean) => {
         try {
-            const response = await fetch(`${API_URL}/users/${userId}`, {
-                method: 'PATCH',
+            const response = await fetch(`${API_URL}/update-row/${userId}`, {
+                method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ activeSend: newValue })
             })
@@ -106,13 +121,13 @@ export default function UserManagement() {
         }
     }
 
-    const handleDeleteUser = async (Phone: string) => {
+    const handleDeleteUser = async (id: string) => {
         try {
-            const response = await fetch(`${API_URL}/users/${Phone}`, {
+            const response = await fetch(`${API_URL}/delete-row/${id}`, {
                 method: 'DELETE'
             })
             if (!response.ok) throw new Error('Failed to delete user')
-            setUsers(users.filter(user => user.Phone !== Phone))
+            setUsers(users.filter(user => user.id !== id))
             toast({
                 title: "Success",
                 description: "User deleted successfully",
@@ -127,20 +142,20 @@ export default function UserManagement() {
     }
 
     const handleAddUser = async () => {
-        if (users.some(user => user.Phone === newUser.Phone)) {
-            toast({
-                title: "Error",
-                description: "Phone number already exists",
-                variant: "destructive",
-            })
-            return
-        }
+        // if (users.some(user => user.Phone === newUser.Phone)) {
+        //     toast({
+        //         title: "Error",
+        //         description: "Phone number already exists",
+        //         variant: "destructive",
+        //     })
+        //     return
+        // }
 
         try {
             const response = await fetch(`${API_URL}/add-row`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(newUser)
+                body: JSON.stringify({ ...newUser,sendDate:globalDate})
             })
             if (!response.ok) throw new Error('Failed to add user')
             const addedUser = await response.json()
@@ -148,10 +163,11 @@ export default function UserManagement() {
             setUsers([...users, addedUser.user])
             setIsAddingUser(false)
             setNewUser({
+                id: '',
                 Name: '',
                 Phone: '',
                 sendDate: '',
-                sendMessage: false
+                activeSend: false
             })
             toast({
                 title: "Success",
@@ -168,7 +184,7 @@ export default function UserManagement() {
 
     const handleUpdateUser = async (updatedUser: User) => {
         try {
-            const response = await fetch(`${API_URL}/users/${updatedUser.id}`, {
+            const response = await fetch(`${API_URL}/update-row/${updatedUser.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(updatedUser)
@@ -222,13 +238,13 @@ export default function UserManagement() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {filteredUsers.map((user,key) => (
+                    {filteredUsers.map((user, key) => (
                         <TableRow key={key}>
                             <TableCell>{user.Name}</TableCell>
                             <TableCell>{user.Phone}</TableCell>
                             <TableCell>
                                 <Switch
-                                    checked={user.sendMessage}
+                                    checked={user.activeSend}
                                     onCheckedChange={(checked) => handleToggleActiveSend(user.id, checked)}
                                 />
                             </TableCell>
