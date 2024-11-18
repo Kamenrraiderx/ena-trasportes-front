@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { NotificationProvider } from "@/components/notification";
 
 
 
@@ -18,7 +19,10 @@ export default function RootLayout({
       <body
         className={` antialiased`}
       >
-        {children}
+        <NotificationProvider>
+
+          {children}
+        </NotificationProvider>
       </body>
     </html>
   );

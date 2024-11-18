@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { toast } from "@/hooks/use-toast"
-
+import { useNotification } from './notification'
 type User = {
     id: string
     Name: string
@@ -17,9 +17,13 @@ type User = {
     activeSend: boolean
 }
 
-const API_URL = 'http://localhost:4000/v1' // Replace with your actual API URL
+const API_URL = 'https://whatsappserver-2.onrender.com/v1' // Replace with your actual API URL
 
 export default function UserManagement() {
+    const { showNotification } = useNotification()
+
+
+
     const hoy = new Date();
 
     // Obtener las partes de la fecha
@@ -43,7 +47,7 @@ export default function UserManagement() {
         Name: '',
         Phone: '',
         sendDate: '',
-        activeSend: false
+        activeSend: true
     })
 
     useEffect(() => {
@@ -57,7 +61,7 @@ export default function UserManagement() {
             if (!response.ok) throw new Error('Failed to fetch users')
             const data = await response.json()
             setUsers(data.users)
-            console.log("Mis usuarios ",data.users)
+            console.log("Mis usuarios ", data.users)
         } catch (error) {
             toast({
                 title: "Error",
@@ -155,7 +159,7 @@ export default function UserManagement() {
             const response = await fetch(`${API_URL}/add-row`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ ...newUser,sendDate:globalDate})
+                body: JSON.stringify({ ...newUser, sendDate: globalDate })
             })
             if (!response.ok) throw new Error('Failed to add user')
             const addedUser = await response.json()
@@ -167,8 +171,9 @@ export default function UserManagement() {
                 Name: '',
                 Phone: '',
                 sendDate: '',
-                activeSend: false
+                activeSend: true
             })
+            showNotification('add', 'Listo')
             toast({
                 title: "Success",
                 description: "User added successfully",
@@ -207,22 +212,14 @@ export default function UserManagement() {
 
     return (
         <div className="container mx-auto p-4">
-            <h1 className="text-2xl font-bold mb-4">User Management</h1>
+            <h1 className="text-2xl font-bold mb-4">Ficha de pago</h1>
 
-            <div className="mb-4">
-                <Label htmlFor="globalDate">Global Message Date</Label>
-                <Input
-                    id="globalDate"
-                    type="datetime-local"
-                    value={globalDate}
-                    onChange={handleGlobalDateChange}
-                />
-            </div>
+
 
             <div className="mb-4">
                 <Input
                     type="text"
-                    placeholder="Search by name or phone number"
+                    placeholder="Buscar por nombre o numero teléfonico"
                     value={searchTerm}
                     onChange={handleSearch}
                 />
@@ -231,17 +228,16 @@ export default function UserManagement() {
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Name</TableHead>
-                        <TableHead>Phone Number</TableHead>
-                        <TableHead>Active Send</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead>Nombre</TableHead>
+
+                        <TableHead>Pagó</TableHead>
+                        <TableHead>Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {filteredUsers.map((user, key) => (
                         <TableRow key={key}>
                             <TableCell>{user.Name}</TableCell>
-                            <TableCell>{user.Phone}</TableCell>
                             <TableCell>
                                 <Switch
                                     checked={user.activeSend}
@@ -251,11 +247,11 @@ export default function UserManagement() {
                             <TableCell>
                                 <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button variant="outline" onClick={() => setSelectedUser(user)}>Edit</Button>
+                                        <Button variant="outline" onClick={() => setSelectedUser(user)}>Editar</Button>
                                     </DialogTrigger>
                                     <DialogContent>
                                         <DialogHeader>
-                                            <DialogTitle>Edit User</DialogTitle>
+                                            <DialogTitle>Editar contacto</DialogTitle>
                                         </DialogHeader>
                                         {selectedUser && (
                                             <div className="space-y-4">
@@ -275,21 +271,16 @@ export default function UserManagement() {
                                                         onChange={(e) => setSelectedUser({ ...selectedUser, Phone: e.target.value })}
                                                     />
                                                 </div>
-                                                <div>
-                                                    <Label htmlFor="messageDate">Message Date</Label>
-                                                    <Input
-                                                        id="messageDate"
-                                                        type="datetime-local"
-                                                        value={selectedUser.sendDate}
-                                                        onChange={(e) => setSelectedUser({ ...selectedUser, sendDate: e.target.value })}
-                                                    />
+                                                <div className='flex justify-between'>
+                                                    <Button onClick={() => handleUpdateUser(selectedUser)}>Save Changes</Button>
+                                                    <Button variant="destructive" onClick={() => handleDeleteUser(user.id)}>Borrar</Button>
+
                                                 </div>
-                                                <Button onClick={() => handleUpdateUser(selectedUser)}>Save Changes</Button>
                                             </div>
                                         )}
                                     </DialogContent>
                                 </Dialog>
-                                <Button variant="destructive" onClick={() => handleDeleteUser(user.id)}>Delete</Button>
+
                             </TableCell>
                         </TableRow>
                     ))}
@@ -298,11 +289,11 @@ export default function UserManagement() {
 
             <Dialog open={isAddingUser} onOpenChange={setIsAddingUser}>
                 <DialogTrigger asChild>
-                    <Button className="mt-4">Add New User</Button>
+                    <Button className="mt-4">Agregar nuevo contácto</Button>
                 </DialogTrigger>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add New User</DialogTitle>
+                        <DialogTitle>Agregar nuevo contácto</DialogTitle>
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
