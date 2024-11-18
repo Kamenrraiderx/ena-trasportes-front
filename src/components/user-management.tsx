@@ -34,11 +34,10 @@ export default function UserManagement() {
     const minutos = String(hoy.getMinutes()).padStart(2, '0');
 
     // Formatear la fecha en el formato deseado
-    const fechaFormateada = `${anio}-${mes}-${dia}T${horas}:${minutos}`;
+    const globalDate = `${anio}-${mes}-${dia}T${horas}:${minutos}`;
 
 
     const [users, setUsers] = useState<User[]>([])
-    const [globalDate, setGlobalDate] = useState<string>(fechaFormateada)
     const [searchTerm, setSearchTerm] = useState<string>('')
     const [selectedUser, setSelectedUser] = useState<User | null>(null)
     const [isAddingUser, setIsAddingUser] = useState<boolean>(false)
@@ -63,6 +62,7 @@ export default function UserManagement() {
             setUsers(data.users)
             console.log("Mis usuarios ", data.users)
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Error",
                 description: "Failed to fetch users",
@@ -80,28 +80,6 @@ export default function UserManagement() {
         user.Phone.includes(searchTerm)
     )
 
-    const handleGlobalDateChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const newGlobalDate = event.target.value
-        setGlobalDate(newGlobalDate)
-        try {
-            const response = await fetch(`${API_URL}/global-date`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ globalDate: newGlobalDate })
-            })
-            if (!response.ok) throw new Error('Failed to update global date')
-            toast({
-                title: "Success",
-                description: "Global date updated successfully",
-            })
-        } catch (error) {
-            toast({
-                title: "Error",
-                description: "Failed to update global date",
-                variant: "destructive",
-            })
-        }
-    }
 
     const handleToggleActiveSend = async (userId: string, newValue: boolean) => {
         try {
@@ -117,6 +95,7 @@ export default function UserManagement() {
                 description: "User updated successfully",
             })
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Error",
                 description: "Failed to update user",
@@ -137,6 +116,7 @@ export default function UserManagement() {
                 description: "User deleted successfully",
             })
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Error",
                 description: "Failed to delete user",
@@ -179,6 +159,7 @@ export default function UserManagement() {
                 description: "User added successfully",
             })
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Error",
                 description: "Failed to add user",
@@ -202,6 +183,7 @@ export default function UserManagement() {
                 description: "User updated successfully",
             })
         } catch (error) {
+            console.log(error)
             toast({
                 title: "Error",
                 description: "Failed to update user",

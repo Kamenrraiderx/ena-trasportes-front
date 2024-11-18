@@ -1,7 +1,7 @@
 'use client'
 
-import React, { createContext, useContext, useState } from 'react'
-import { Toast, ToastProvider, ToastViewport } from "@/components/ui/toast"
+import React, { createContext, useContext } from 'react'
+import {  ToastProvider, ToastViewport } from "@/components/ui/toast"
 import { useToast } from "@/hooks/use-toast"
 
 // Definimos los tipos de notificaciones
