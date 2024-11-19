@@ -55,7 +55,6 @@ export default function UserManagement() {
 
     const fetchUsers = async () => {
         try {
-            console.log('si')
             const response = await fetch(`${API_URL}/getAll`)
             if (!response.ok) throw new Error('Failed to fetch users')
             const data = await response.json()
@@ -66,6 +65,23 @@ export default function UserManagement() {
             toast({
                 title: "Error",
                 description: "Failed to fetch users",
+                variant: "destructive",
+            })
+        }
+    }
+
+    const fetchMessages = async (messageType:string) => {
+        try {
+            console.log(messageType)
+            const response = await fetch(`${API_URL}/${messageType}`)
+            if (!response.ok) throw new Error('Failed to fetch messages')
+            const data = await response.json()
+            console.log("Mensaje respuesta", data)
+        } catch (error) {
+            console.log(error)
+            toast({
+                title: "Error",
+                description: "Failed to fetch messages",
                 variant: "destructive",
             })
         }
@@ -222,8 +238,8 @@ export default function UserManagement() {
                             <TableCell>{user.Name}</TableCell>
                             <TableCell>
                                 <Switch
-                                    checked={user.activeSend}
-                                    onCheckedChange={(checked) => handleToggleActiveSend(user.id, checked)}
+                                    checked={!user.activeSend}
+                                    onCheckedChange={(checked) => handleToggleActiveSend(user.id, !checked)}
                                 />
                             </TableCell>
                             <TableCell>
@@ -238,7 +254,7 @@ export default function UserManagement() {
                                         {selectedUser && (
                                             <div className="space-y-4">
                                                 <div>
-                                                    <Label htmlFor="name">Name</Label>
+                                                    <Label htmlFor="name">Nombre</Label>
                                                     <Input
                                                         id="name"
                                                         value={selectedUser.Name}
@@ -246,7 +262,7 @@ export default function UserManagement() {
                                                     />
                                                 </div>
                                                 <div>
-                                                    <Label htmlFor="phoneNumber">Phone Number</Label>
+                                                    <Label htmlFor="phoneNumber">Número teléfonico</Label>
                                                     <Input
                                                         id="phoneNumber"
                                                         value={selectedUser.Phone}
@@ -254,7 +270,7 @@ export default function UserManagement() {
                                                     />
                                                 </div>
                                                 <div className='flex justify-between'>
-                                                    <Button onClick={() => handleUpdateUser(selectedUser)}>Save Changes</Button>
+                                                    <Button onClick={() => handleUpdateUser(selectedUser)}>Guardar Cambios</Button>
                                                     <Button variant="destructive" onClick={() => handleDeleteUser(user.id)}>Borrar</Button>
 
                                                 </div>
@@ -279,7 +295,7 @@ export default function UserManagement() {
                     </DialogHeader>
                     <div className="space-y-4">
                         <div>
-                            <Label htmlFor="newName">Name</Label>
+                            <Label htmlFor="newName">Nombre</Label>
                             <Input
                                 id="newName"
                                 value={newUser.Name}
@@ -287,26 +303,23 @@ export default function UserManagement() {
                             />
                         </div>
                         <div>
-                            <Label htmlFor="newPhoneNumber">Phone Number</Label>
+                            <Label htmlFor="newPhoneNumber">Número télefonico</Label>
                             <Input
                                 id="newPhoneNumber"
                                 value={newUser.Phone}
                                 onChange={(e) => setNewUser({ ...newUser, Phone: e.target.value })}
                             />
                         </div>
-                        <div>
-                            <Label htmlFor="newMessageDate">Message Date</Label>
-                            <Input
-                                id="newMessageDate"
-                                type="datetime-local"
-                                value={newUser.sendDate}
-                                onChange={(e) => setNewUser({ ...newUser, sendDate: e.target.value })}
-                            />
-                        </div>
-                        <Button onClick={handleAddUser}>Add User</Button>
+                        <Button onClick={handleAddUser}>Agregar contácto</Button>
                     </div>
                 </DialogContent>
             </Dialog>
+            <div className='flex flex-col'>
+                <Button onClick={()=>fetchMessages('notice')} className="mt-4 bg-green-600 font-bold">Aviso</Button>
+                <Button onClick={()=>fetchMessages('warning')} className="mt-4 bg-yellow-600 font-bold">Advertencia</Button>
+                <Button onClick={()=>fetchMessages('surcharge')} className="mt-4 bg-red-600 font-bold">Recargo</Button>
+                <Button onClick={()=>fetchMessages('resume')} className="mt-4 bg-sky-600 font-bold">Resumen</Button>
+            </div>
         </div>
     )
 }
